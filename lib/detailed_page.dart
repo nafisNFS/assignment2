@@ -54,20 +54,10 @@ class DetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String? title;
-    String? subtitle;
 
-    void findAndSetSubtitle(String imageText) {
-      for (var item in titleSubtitleList) {
-        if (item['title'] == imageText) {
-          title = item['title'];
-          subtitle = item['subtitle'];
-          break;
-        }
-      }
-    }
 
-    findAndSetSubtitle(imageText);
+
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: GlobalColor.mainColor,
@@ -100,122 +90,182 @@ class DetailPage extends StatelessWidget {
       ),
       body: OrientationBuilder(
         builder: (context, orientation) {
-          return SingleChildScrollView(
+          return orientation == Orientation.portrait
+              ? _buildPortraitLayout(context)
+              : _buildLandscapeLayout(context);
+        },
+      ),
+    );
+  }
+
+  Widget _buildPortraitLayout(BuildContext context) {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildImage(context),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Center(
-                  child: Container(
-                    margin: const EdgeInsets.all(16.0),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20.0),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.5),
-                          spreadRadius: 2,
-                          blurRadius: 7,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20.0),
-                      child: Image.asset(
-                        imagePath,
-                        fit: BoxFit.cover,
-                        width: orientation == Orientation.portrait
-                            ? MediaQuery.of(context).size.width * 0.8
-                            : MediaQuery.of(context).size.width * 0.5, // Adjust width here
-                      ),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title ?? "Title",
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20.0,
-                        ),
-                      ),
-                      const SizedBox(height: 8.0),
-                      Text(
-                        subtitle ?? "Subtitle",
-                        style: const TextStyle(
-                          fontSize: 16.0,
-                          color: Colors.black,
-                        ),
-                      ),
-                      const SizedBox(height: 16.0),
-                      Center(
-                        child: SizedBox(
-                          width: 387.0,
-                          height: 51.0,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              // On Pressed Action
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: GlobalColor.mainColor,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30.0),
-                              ),
-                            ),
-                            child: const Text(
-                              "See More",
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8.0),
-                      const Text(
-                        "Suggestions",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20.0,
-                            color: GlobalColor.mainColor),
-                      ),
-                      const SizedBox(height: 8.0),
-                      GridView.builder(
-                        shrinkWrap: true,
-                        itemCount: titleSubtitleList.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          return ImageContainer(
-                            imagePath: imageList[index],
-                            text: textList[index],
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => DetailPage(
-                                    imageText: textList[index],
-                                    imagePath: imageList[index],
-                                  ),
-                                ),
-                              );
-                            },
-                          );
-                        },
-                        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                          maxCrossAxisExtent: 180,
-                          mainAxisSpacing: 20,
-                          crossAxisSpacing: 20,
-                        ),
-                        physics: const BouncingScrollPhysics(),
-                      )
-                    ],
-                  ),
-                ),
+                _buildTitleWidget(),
+                const SizedBox(height: 8.0),
+                _buildSubtitleWidget(),
+                const SizedBox(height: 16.0),
+                _buildSeeMoreButton(),
+                const SizedBox(height: 8.0),
+                _buildSuggestionsWidget(context),
               ],
             ),
-          );
-        },
+          ),
+        ],
       ),
+    );
+  }
+
+  Widget _buildLandscapeLayout(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          flex: 2,
+          child: _buildImage(context),
+        ),
+        Expanded(
+          flex: 3,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildTitleWidget(),
+                  const SizedBox(height: 8.0),
+                  _buildSubtitleWidget(),
+                  const SizedBox(height: 16.0),
+                  _buildSeeMoreButton(),
+                  const SizedBox(height: 8.0),
+                  _buildSuggestionsWidget(context),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildImage(BuildContext context) {
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 2,
+              blurRadius: 7,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20.0),
+          child: Image.asset(
+            imagePath,
+            fit: BoxFit.cover,
+            width: MediaQuery.of(context).size.width * 0.8,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTitleWidget() {
+    return Text(
+       imageText,
+      style: const TextStyle(
+        fontWeight: FontWeight.bold,
+        fontSize: 20.0,
+      ),
+    );
+  }
+
+  Widget _buildSubtitleWidget() {
+    return const Text(
+       "In the embrace of nature's tranquil beauty, find the strength to bloom against life's challenges. Let the whispers of the wind and the dance of the leaves remind you of your resilience and the infinite possibilities that await you.",
+      style: TextStyle(
+        fontSize: 16.0,
+        color: Colors.black,
+      ),
+    );
+  }
+
+  Widget _buildSeeMoreButton() {
+    return Center(
+      child: SizedBox(
+        width: 387.0,
+        height: 51.0,
+        child: ElevatedButton(
+          onPressed: () {
+            // On Pressed Action
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: GlobalColor.mainColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30.0),
+            ),
+          ),
+          child: const Text(
+            "See More",
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSuggestionsWidget(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "Suggestions",
+          style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 20.0,
+              color: GlobalColor.mainColor),
+        ),
+        const SizedBox(height: 8.0),
+        GridView.builder(
+          shrinkWrap: true,
+          itemCount: titleSubtitleList.length,
+          itemBuilder: (BuildContext context, int index) {
+            return ImageContainer(
+              imagePath: imageList[index],
+              text: textList[index],
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DetailPage(
+                      imageText: textList[index],
+                      imagePath: imageList[index],
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: 180,
+            mainAxisSpacing: 20,
+            crossAxisSpacing: 20,
+          ),
+          physics: const BouncingScrollPhysics(),
+        ),
+      ],
     );
   }
 }
